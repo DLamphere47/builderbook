@@ -4,7 +4,8 @@ tmp/
 npm-debug.log
 .DS_Store
 
-
+.yarn
+.yarnrc
 .build/*
 .next
 .vscode/

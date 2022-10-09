@@ -3,10 +3,12 @@
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
+    "test": "jest",
     "dev": "nodemon server/server.js --watch server",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint '**/*.js' '**/*.jsx'"
+    "lint": "eslint '**/*.js' '**/*.jsx'",
+    "coverageDirectory": "./.coverage"
   },
   "dependencies": {
     "@emotion/cache": "^11.7.1",

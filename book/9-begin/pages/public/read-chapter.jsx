@@ -4,7 +4,7 @@ import Error from 'next/error';
 import Head from 'next/head';
 import { withRouter } from 'next/router';
 import throttle from 'lodash/throttle';
-
+import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import Link from 'next/link';
 
 import Header from '../../components/Header';
@@ -355,15 +355,11 @@ class ReadChapter extends React.Component {
             left: '15px',
           }}
         >
-          <i //eslint-disable-line
-            className="material-icons"
+          <FormatListBulletedIcon
             style={styleIcon}
             onClick={this.toggleChapterList}
             onKeyPress={this.toggleChapterList}
-            role="button"
-          >
-            format_list_bulleted
-          </i>
+          />
         </div>
       </div>
     );

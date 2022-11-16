@@ -5,11 +5,10 @@ const next = require('next');
 const mongoose = require('mongoose');
 const compression = require('compression');
 const helmet = require('helmet');
-
 const setupGoogle = require('./google');
 const { setupGithub } = require('./github');
 const api = require('./api');
-
+const setupSitemapAndRobots = require('./sitemapAndRobots');
 // const { insertTemplates } = require('./models/EmailTemplate');
 const routesWithSlug = require('./routesWithSlug');
 const { stripeCheckoutCallback } = require('./stripe');
@@ -17,10 +16,10 @@ const { stripeCheckoutCallback } = require('./stripe');
 require('dotenv').config();
 
 const dev = process.env.NODE_ENV !== 'production';
-const MONGO_URL = process.env.MONGO_URL_TEST;
+const MONGO_URL = dev ? process.env.MONGO_URL_TEST : process.env.MONGO_URL;
 
 const port = process.env.PORT || 8000;
-const ROOT_URL = `http://localhost:${port}`;
+const ROOT_URL = dev ? process.env.NEXT_PUBLIC_URL_APP : process.env.NEXT_PUBLIC_PRODUCTION_URL_APP;
 
 const options = {
   useNewUrlParser: true,
@@ -43,9 +42,11 @@ app.prepare().then(async () => {
 
   server.use(helmet({ contentSecurityPolicy: false }));
   server.use(compression());
-
   server.use(express.json());
-
+  // give all Nextjs's requests to Nextjs server
+  server.get('/_next/*', (req, res) => {
+    handle(req, res);
+  });
   const MongoStore = mongoSessionStore(session);
   const sess = {
     name: process.env.SESSION_NAME,
@@ -59,10 +60,13 @@ app.prepare().then(async () => {
     cookie: {
       httpOnly: true,
       maxAge: 14 * 24 * 60 * 60 * 1000, // expires in 14 days
-      domain: 'localhost',
+      domain: dev ? 'localhost' : process.env.COOKIE_DOMAIN,
     },
   };
-
+  if (!dev) {
+    server.set('trust proxy', 1);
+    sess.cookie.secure = true;
+  }
   server.use(session(sess));
 
   // await insertTemplates();
@@ -71,7 +75,7 @@ app.prepare().then(async () => {
   setupGithub({ server, ROOT_URL });
   api(server);
   routesWithSlug({ server, app });
-
+  setupSitemapAndRobots({ server });
   stripeCheckoutCallback({ server });
 
   server.get('*', (req, res) => {
